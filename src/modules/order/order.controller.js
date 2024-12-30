@@ -261,7 +261,7 @@ export const cancelOrder = catchAsyncError (async (req,res,next)=>{
 
 export const webhook = catchAsyncError(async(req, res , next) => {
   const stripe = new Stripe(process.env.stripe_secret)
-  let event;
+  let event = req.body;
  
   if (process.env.endpointSecret) {
     const signature = req.headers['stripe-signature'];
