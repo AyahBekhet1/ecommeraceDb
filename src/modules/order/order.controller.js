@@ -278,13 +278,12 @@ export const webhook = catchAsyncError(async(req, res , next) => {
   }
 
   // Handle the event
-  const {orderId} = event.data.object.metadata
   if (event.type !== "checkout.session.completed") {
-    await orderModel.findOneAndUpdate({_id:orderId} , {status:"rejected"})
+    await orderModel.updateOne({_id:event.data.object.metadata.orderId} , {status:"rejected"})
 
     return res.status(400).json({msg:"fail"})
   }else{
-    await orderModel.findOneAndUpdate({_id:orderId} , {status:"placed"})
+    await orderModel.updateOne({_id:event.data.object.metadata.orderId} , {status:"placed"})
 
     return res.status(200).json({msg:"done"})
   }
