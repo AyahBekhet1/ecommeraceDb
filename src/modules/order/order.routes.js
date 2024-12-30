@@ -1,11 +1,11 @@
-import { Router } from "express";
+import express from "express";
 import * as OC from "./order.controller.js";
 import * as OV from "./order.validation.js";
 import { validation } from "../../middleware/validation.js";
 import { auth } from "../../middleware/auth.js";
 import { systemRoles } from "../../utils/systemRoles.js";
 
-const orderRouter = Router();
+const orderRouter = express.Router();
 
 orderRouter.post(
   "/",
@@ -23,5 +23,7 @@ orderRouter.put(
 );
 
 
+orderRouter.post('/webhook', express.raw({type: 'application/json'}), OC.webhook)
 
-export default orderRouter;
+  
+export default orderRouter

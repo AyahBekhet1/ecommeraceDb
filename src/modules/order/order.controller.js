@@ -256,3 +256,36 @@ export const cancelOrder = catchAsyncError (async (req,res,next)=>{
 
   res.status(200).json({msg:"done"})
 })
+
+//////////////////////////////webhook////////////////////////////
+
+export const webhook = catchAsyncError(async(req, res , next) => {
+  const stripe = new Stripe(process.env.stripe_secret)
+  let event;
+ 
+  if (process.env.endpointSecret) {
+    const signature = req.headers['stripe-signature'];
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        process.env.endpointSecret
+      );
+    } catch (err) {
+     res.status(400).send(`webhook error ${err.message}`)
+     return
+    }
+  }
+
+  // Handle the event
+  const {orderId} = event.data.object.metadata
+  if (event.type !== "checkout.session.completed") {
+    await orderModel.findOneAndUpdate({_id:orderId} , {status:"rejected"})
+
+    return res.status(400).json({msg:"fail"})
+  }else{
+    await orderModel.findOneAndUpdate({_id:orderId} , {status:"placed"})
+
+    return res.status(200).json({msg:"done"})
+  }
+})
