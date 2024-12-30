@@ -278,13 +278,27 @@ export const webhook = catchAsyncError(async(req, res , next) => {
   }
 
   // Handle the event
-  if (event.type !== "checkout.session.completed") {
-    await orderModel.updateOne({_id:event.data.object.metadata.orderId} , {status:"rejected"})
+  // if (event.type !== "checkout.session.completed") {
+  //   await orderModel.updateOne({_id:event.data.object.metadata.orderId} , {status:"rejected"})
 
-    return res.status(400).json({msg:"fail"})
-  }else{
-    await orderModel.updateOne({_id:event.data.object.metadata.orderId} , {status:"placed"})
+  //   return res.status(400).json({msg:"fail"})
+  // }else{
+  //   await orderModel.updateOne({_id:event.data.object.metadata.orderId} , {status:"placed"})
 
-    return res.status(200).json({msg:"done"})
+  //   return res.status(200).json({msg:"done"})
+  // }
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      console.log('PaymentIntent was successful!', paymentIntent);
+      break;
+    case 'payment_method.attached':
+      const paymentMethod = event.data.object;
+      console.log('PaymentMethod was attached to a Customer!', paymentMethod);
+      break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
   }
+  res.json({ received: true });
+
 })
